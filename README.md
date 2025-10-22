@@ -1,29 +1,50 @@
-# CatchUp Platform
+# Catch-Up Platform (cath-up-platform)
 
-## Summary
-This project is a simple REST API that expands the experience of CatchUp application, the News API client app, with the possibility of saving favorite news sources. It is implemented with the Java language, Spring Boot Framework, Spring Data JPA, and MySQL database. It also illustrates Domain-Driven Design with tactical patterns.
+## Overview
 
-### Reference Documentation
+Catch-Up Platform is a small Spring Boot service that provides an API to manage users' favorite news sources. The project demonstrates a clean package structure separated into bounded contexts (news and shared) and follows simple command/query service patterns with JPA persistence.
 
-For further reference, please consider the following sections:
+## Features
 
-* [Official Apache Maven documentation](https://maven.apache.org/guides/index.html)
-* [Spring Boot Maven Plugin Reference Guide](https://docs.spring.io/spring-boot/3.5.6/maven-plugin)
-* [Create an OCI image](https://docs.spring.io/spring-boot/3.5.6/maven-plugin/build-image.html)
-* [Spring Data JPA](https://docs.spring.io/spring-boot/docs/3.5.6/reference/htmlsingle/index.html#data.sql.jpa-and-spring-data)
-* [Spring Boot DevTools](https://docs.spring.io/spring-boot/docs/3.5.6/reference/htmlsingle/index.html#using.devtools)
-* [Validation](https://docs.spring.io/spring-boot/docs/3.5.6/reference/htmlsingle/index.html#io.validation)
-* [Spring Web](https://docs.spring.io/spring-boot/docs/3.5.6/reference/htmlsingle/index.html#web)
+- List favorite sources scoped to a News API key
+- Retrieve a favorite source by its identifier
+- Retrieve a favorite source by News API key + source id
+- Create (persist) a new favorite source
+- Custom Hibernate naming strategy to convert identifiers to snake_case and plural table names.
 
-### Guides
+## Technologies
 
-The following guides illustrate how to use some features concretely:
+- Java 25+ and Spring Boot
+- Spring Web (REST controllers)
+- Spring Data JPA (Hibernate)
+- Lombok (compile-time helpers)
+- PlantUML (architecture diagrams in `docs/`)
 
-* [Accessing Data with JPA](https://spring.io/guides/gs/accessing-data-jpa/)
-* [Accessing data with MySQL](https://spring.io/guides/gs/accessing-data-mysql/)
-* [Validation](https://spring.io/guides/gs/validating-form-input/)
-* [Building a RESTful Web Service](https://spring.io/guides/gs/rest-service/)
-* [Serving Web Content with Spring MVC](https://spring.io/guides/gs/serving-web-content/)
-* [Building REST services with Spring](https://spring.io/guides/tutorials/rest/)
+## Technical stories
 
+The API-focused technical stories for frontend integration are in [`docs/user-stories.md`](docs/user-stories.md).
 
+## Class diagram
+
+A PlantUML class diagram that reflects the code structure and bounded contexts is available at [`docs/class-diagram.puml`](docs/class-diagram.puml).
+
+## Getting started (quick)
+
+To run the application locally (recommended: macOS / Linux):
+
+```bash
+./mvnw spring-boot:run
+```
+
+Or build and run the jar:
+
+```bash
+./mvnw clean package
+java -jar target/*.jar
+```
+
+## Notes
+
+- This repository intentionally reflects a focused subset of functionality (favorites management). Delete operations are not currently implemented in the controllers.
+- For API integration details and acceptance criteria, see `docs/user-stories.md`.
+- For the system class diagram, see `docs/class-diagram.puml`.
