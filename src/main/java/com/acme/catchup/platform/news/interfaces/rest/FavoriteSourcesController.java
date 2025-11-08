@@ -93,7 +93,7 @@ public class FavoriteSourcesController {
      * Gets a favorite source by ID.
      *
      * @param id Favorite source ID
-     * @return ResponseEntity with the favorite source resource if found, or not found otherwise
+     * @return ResponseEntity with the favorite source resource if found or not found otherwise
      * @see FavoriteSourceResource
      * @since 1.0
      */
@@ -115,7 +115,7 @@ public class FavoriteSourcesController {
      * Gets all favorite sources by news API key.
      *
      * @param newsApiKey News API key
-     * @return ResponseEntity with the list of favorite source resources if found, or not found otherwise
+     * @return ResponseEntity with the list of favorite source resources if found or not found otherwise
      * @see FavoriteSourceResource
      * @since 1.0
      */
@@ -132,7 +132,7 @@ public class FavoriteSourcesController {
      *
      * @param newsApiKey News API key
      * @param sourceId   Source ID
-     * @return ResponseEntity with the favorite source resource if found, or not found otherwise
+     * @return ResponseEntity with the favorite source resource if found or not found otherwise
      * @see FavoriteSourceResource
      * @since 1.0
      */
