@@ -44,5 +44,6 @@ ENTRYPOINT ["java", "-jar", "app.jar"]
 # - DATABASE_USER: The username for the database connection.
 # - DATABASE_PASSWORD: The password for the database connection.
 # - DATABASE_URL: The URL of the database to connect to.
+# - DATABASE_PORT: The port of the database to connect to.
 # - PORT: The port on which the application will run (default is 8080).
 # - SPRING_PROFILES_ACTIVE: The active Spring profile (Must be 'prod' to use the runtime configuration).
