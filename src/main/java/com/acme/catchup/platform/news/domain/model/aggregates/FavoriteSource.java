@@ -27,6 +27,9 @@ import java.util.Date;
  */
 @Entity
 @EntityListeners(AuditingEntityListener.class)
+@Table(uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"news_api_key", "source_id"}, name = "uk_favorite_source_news_api_key_source_id")
+})
 public class FavoriteSource extends AbstractAggregateRoot<FavoriteSource> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
