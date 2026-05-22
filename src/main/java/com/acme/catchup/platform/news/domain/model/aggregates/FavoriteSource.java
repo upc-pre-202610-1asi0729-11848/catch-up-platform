@@ -1,10 +1,3 @@
-/**
- * FavoriteSource Aggregate Root
- *
- * @summary
- * The FavoriteSource class is an aggregate root that represents a favorite news source.
- * It is responsible for handling the CreateFavoriteSourceCommand command.
- */
 package com.acme.catchup.platform.news.domain.model.aggregates;
 
 import com.acme.catchup.platform.news.domain.model.commands.CreateFavoriteSourceCommand;
@@ -22,36 +15,36 @@ import java.time.Instant;
  *
  * @summary
  * The FavoriteSource class is an aggregate root that represents a favorite news source.
- * It is responsible for handling the CreateFavoriteSourceCommand command.
+ * It is responsible for handling the {@link CreateFavoriteSourceCommand} command.
  * @since 1.0
  */
+@Getter
 @Entity
 @EntityListeners(AuditingEntityListener.class)
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"news_api_key", "source_id"}, name = "uk_favorite_source_news_api_key_source_id")
+        @UniqueConstraint(columnNames = {"news_api_key", "source_id"}, name = FavoriteSource.NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT)
 })
 public class FavoriteSource extends AbstractAggregateRoot<FavoriteSource> {
+
+    /** Unique constraint name shared with persistence layer. */
+    public static final String NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT = "uk_favorite_source_news_api_key_source_id";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
     private Long id;
 
     @Column(nullable = false)
-    @Getter
     private String newsApiKey;
 
     @Column(nullable = false)
-    @Getter
     private String sourceId;
 
     @Column(nullable = false, updatable = false)
     @CreatedDate
-    @Getter
     private Instant createdAt;
 
     @Column(nullable = false)
     @LastModifiedDate
-    @Getter
     private Instant updatedAt;
 
     protected FavoriteSource() {}
