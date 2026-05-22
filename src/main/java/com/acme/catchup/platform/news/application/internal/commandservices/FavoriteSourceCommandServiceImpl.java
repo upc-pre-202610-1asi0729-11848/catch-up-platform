@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +25,7 @@ import java.util.Optional;
  */
 @Service
 public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandService {
+    private static final String DUPLICATE_FAVORITE_SOURCE_CONSTRAINT = "uk_favorite_source_news_api_key_source_id";
     private final FavoriteSourceRepository favoriteSourceRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(FavoriteSourceCommandServiceImpl.class);
     private final MessageSource messageSource;
@@ -40,19 +42,35 @@ public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandSe
     @Override
     @Transactional
     public Optional<FavoriteSource> handle(CreateFavoriteSourceCommand command) {
-        // In case the favorite source already exists, Log a localized error message and return empty.
-        if (favoriteSourceRepository.existsByNewsApiKeyAndSourceId(command.newsApiKey(), command.sourceId())) {
-            LOGGER.error(messageSource.getMessage("favorite.source.error.duplicate", null, LocaleContextHolder.getLocale()));
-            return Optional.empty();
+        try {
+            var favoriteSource = new FavoriteSource(command);
+            var createdFavoriteSource = favoriteSourceRepository.save(favoriteSource);
+            LOGGER.info("Favorite source created: newsApiKey={}, sourceId={}, id={}, createdAt={}, updatedAt={}",
+                    command.newsApiKey(),
+                    command.sourceId(),
+                    createdFavoriteSource.getId(),
+                    createdFavoriteSource.getCreatedAt(),
+                    createdFavoriteSource.getUpdatedAt());
+            return Optional.of(createdFavoriteSource);
+        } catch (DataIntegrityViolationException exception) {
+            if (isDuplicateFavoriteSourceViolation(exception)) {
+                // Unique constraint hit: treat as duplicate create request.
+                LOGGER.warn(messageSource.getMessage("favorite.source.error.duplicate", null, LocaleContextHolder.getLocale()));
+                return Optional.empty();
+            }
+            throw exception;
         }
-        var favoriteSource = new FavoriteSource(command);
-        var createdFavoriteSource = favoriteSourceRepository.save(favoriteSource);
-        LOGGER.info("Favorite source created: newsApiKey={}, sourceId={}, id={}, createdAt={}, updatedAt={}",
-                command.newsApiKey(),
-                command.sourceId(),
-                createdFavoriteSource.getId(),
-                createdFavoriteSource.getCreatedAt(),
-                createdFavoriteSource.getUpdatedAt());
-        return Optional.of(createdFavoriteSource);
+    }
+
+    private boolean isDuplicateFavoriteSourceViolation(DataIntegrityViolationException exception) {
+        Throwable cause = exception;
+        while (cause != null) {
+            String message = cause.getMessage();
+            if (message != null && message.contains(DUPLICATE_FAVORITE_SOURCE_CONSTRAINT)) {
+                return true;
+            }
+            cause = cause.getCause();
+        }
+        return false;
     }
 }
