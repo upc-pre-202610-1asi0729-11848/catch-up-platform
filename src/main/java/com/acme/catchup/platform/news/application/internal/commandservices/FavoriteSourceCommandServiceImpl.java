@@ -47,6 +47,8 @@ public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandSe
         }
         var favoriteSource = new FavoriteSource(command);
         var createdFavoriteSource = favoriteSourceRepository.save(favoriteSource);
+        LOGGER.info("Favorite source created: newsApiKey={}, sourceId={}, id={}",
+                command.newsApiKey(), command.sourceId(), createdFavoriteSource.getId());
         return Optional.of(createdFavoriteSource);
     }
 }
