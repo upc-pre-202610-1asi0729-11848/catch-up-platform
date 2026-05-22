@@ -2,7 +2,7 @@
 
 ## Overview
 
-Catch-Up Platform is a small Spring Boot service that provides an API to manage users' favorite news sources. The project demonstrates a clean package structure separated into bounded contexts (news and shared) and follows simple command/query service patterns with JPA persistence.
+Catch-Up Platform is a Spring Boot service that provides a REST API to manage users' favorite news sources. The project is structured around Domain-Driven Design (DDD), organized into bounded contexts (`news` and `shared`), using CQRS-style application services and JPA persistence.
 
 ## Features
 
@@ -10,20 +10,50 @@ Catch-Up Platform is a small Spring Boot service that provides an API to manage 
 - Retrieve a favorite source by its identifier
 - Retrieve a favorite source by News API key and source id
 - Create (persist) a new favorite source
-- Custom Hibernate naming strategy to convert identifiers to snake_case and plural table names.
+- Custom Hibernate naming strategy to convert identifiers to snake_case and plural table names
 
 ## Technologies
 
 - OpenJDK 26 and Spring Boot 4.0.6
 - Spring Web (REST controllers)
-- Spring Data JPA (Hibernate)
+- Spring Data JPA (Hibernate) with MySQL
+- Spring Validation (Jakarta Bean Validation)
+- SpringDoc OpenAPI 3 / Swagger UI
 - Lombok (compile-time helpers)
 - PlantUML (architecture diagrams in `docs/`)
 
 ## Prerequisites
 
 - OpenJDK 26
+- MySQL 8+ (database server)
 - Docker (optional, to run container image)
+
+## Environment variables
+
+The application resolves credentials and connection details from environment variables. Set the following before running locally or in a container:
+
+| Variable            | Description                                      |
+|---------------------|--------------------------------------------------|
+| `DATABASE_USER`     | MySQL username                                   |
+| `DATABASE_PASSWORD` | MySQL password                                   |
+| `DATABASE_URL`      | JDBC URL (default profile uses `localhost:3306`) |
+| `DATABASE_NAME`     | Database name (default: `catch-up-os`)           |
+| `DATABASE_PORT`     | Database port (production profile)               |
+| `PORT`              | Application port (default: `8080`)               |
+
+## Spring profiles
+
+| Profile | Usage |
+|---------|-------|
+| *(default)* | Uses `localhost:3306` with SSL enabled; SQL logging off |
+| `dev` | Uses `localhost:3306` with SSL disabled; SQL logging on |
+| `prod` | Reads full connection URL from env vars; used in Docker/CI |
+
+Set the active profile with:
+
+```bash
+export SPRING_PROFILES_ACTIVE=dev
+```
 
 ## Technical stories
 
@@ -33,11 +63,22 @@ The API-focused technical stories for frontend integration are in [`docs/user-st
 
 A PlantUML class diagram that reflects the code structure and bounded contexts is available at [`docs/class-diagram.puml`](docs/class-diagram.puml).
 
+## API documentation (Swagger UI)
+
+When the application is running, interactive API documentation is available at:
+
+```
+http://localhost:8080/swagger-ui/index.html
+```
+
 ## Getting started (quick)
 
-To run the application locally (recommended: macOS / Linux):
+Export the required environment variables, then run with the `dev` profile:
 
 ```bash
+export DATABASE_USER=your_db_user
+export DATABASE_PASSWORD=your_db_password
+export SPRING_PROFILES_ACTIVE=dev
 ./mvnw spring-boot:run
 ```
 
@@ -56,14 +97,18 @@ Build the container image:
 docker build -t catch-up-platform:local .
 ```
 
-Run the container:
+Run the container (supply database credentials via `-e`):
 
 ```bash
-docker run --rm -p 8080:8080 --name catch-up-platform catch-up-platform:local
+docker run --rm -p 8080:8080 \
+  -e DATABASE_USER=your_db_user \
+  -e DATABASE_PASSWORD=your_db_password \
+  -e DATABASE_URL=jdbc:mysql://your_db_host:3306/catch-up-os \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  --name catch-up-platform \
+  catch-up-platform:local
 ```
 
 ## Notes
 
-- This repository intentionally reflects a focused subset of functionality (favorite management). Delete operations are not currently implemented in the controllers.
-- For API integration details and acceptance criteria, see `docs/user-stories.md`.
-- For the system class diagram, see `docs/class-diagram.puml`.
+- This repository intentionally reflects a focused subset of functionality (favorite management); delete operations are not currently implemented.
