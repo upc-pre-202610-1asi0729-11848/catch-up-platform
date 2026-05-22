@@ -3,9 +3,13 @@
 ## Overview
 This document contains API-focused technical stories intended for frontend or mobile developers integrating with the catch-up-platform REST API.
 
+Base path: `/api/v1`
+
 ## Technical Stories
 
 ### TS001 — List favorite sources by NewsAPI key
+**Endpoint:** `GET /api/v1/favorite-sources?newsApiKey={newsApiKey}`
+
 As a frontend developer, I want to request the API to list favorite sources for a given `{newsApiKey}` so that I can implement the listing feature in my application.
 #### Acceptance criteria:
 - Scenario: Returns one or more favorites
@@ -16,8 +20,14 @@ As a frontend developer, I want to request the API to list favorite sources for 
     - Given a request to list favorite sources filtered by `{newsApiKey}` is received
     - When the API finds no matching resources
     - Then the API responds with `200 OK` and returns an empty array.
+- Scenario: Invalid parameter value
+    - Given a request with a `newsApiKey` value that is blank, exceeds 256 characters, or contains disallowed characters is received
+    - When the API validates the parameter
+    - Then the API responds with `400 Bad Request` and an error payload describing the invalid parameter.
 ---
 ### TS002 — Retrieve a favorite source by id
+**Endpoint:** `GET /api/v1/favorite-sources/{id}`
+
 As a frontend developer, I want to request a favorite source by its `{id}` so that I can implement the details view in my application.
 #### Acceptance criteria:
 - Scenario: Found
@@ -27,9 +37,13 @@ As a frontend developer, I want to request a favorite source by its `{id}` so th
 - Scenario: Not found
     - Given a request for a favorite source identified by a non-existent `{id}` is received
     - When the API does not find the resource
-    - Then the API responds with `404 Not Found` and an error payload.
+    - Then the API responds with `404 Not Found` and an empty body.
 ---
 ### TS003 — Check whether a source is favorite for a NewsAPI key
+**Endpoint:** `GET /api/v1/favorite-sources?newsApiKey={newsApiKey}&sourceId={sourceId}`
+
+> Note: TS001 and TS003 share the same endpoint. Providing only `newsApiKey` triggers listing (TS001); providing both `newsApiKey` and `sourceId` triggers exact lookup (TS003).
+
 As a frontend developer, I want to query the API with `{newsApiKey}` and `{sourceId}` so that I can implement the UI state that indicates whether a source is favorite.
 #### Acceptance criteria:
 - Scenario: Favorite exists
@@ -39,9 +53,15 @@ As a frontend developer, I want to query the API with `{newsApiKey}` and `{sourc
 - Scenario: Favorite does not exist
     - Given a request that specifies both `{newsApiKey}` and `{sourceId}` with no match is received
     - When the API does not find a matching resource
-    - Then the API responds with `404 Not Found` and an error payload.
+    - Then the API responds with `404 Not Found` and an empty body.
+- Scenario: Invalid parameter value
+    - Given a request with a `newsApiKey` or `sourceId` value that is blank, exceeds 256 characters, or contains disallowed characters is received
+    - When the API validates the parameters
+    - Then the API responds with `400 Bad Request` and an error payload describing the invalid parameter.
 ---
 ### TS004 — Create a favorite source
+**Endpoint:** `POST /api/v1/favorite-sources`
+
 As a frontend developer, I want to add a favorite source through the API so that I can implement the creation feature in my application.
 #### Acceptance criteria:
 - Scenario: Successful create
