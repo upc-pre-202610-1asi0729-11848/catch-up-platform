@@ -14,6 +14,9 @@ public class FavoriteSourceResourceFromEntityAssembler {
      * @return FavoriteSourceResource created from the entity
      */
     public static FavoriteSourceResource toResourceFromEntity(FavoriteSource entity) {
-        return new FavoriteSourceResource(entity.getId(), entity.getNewsApiKey(), entity.getSourceId());
+        return new FavoriteSourceResource(
+                entity.getId(),
+                entity.getNewsApiKey(),
+                entity.getSourceId());
     }
 }
