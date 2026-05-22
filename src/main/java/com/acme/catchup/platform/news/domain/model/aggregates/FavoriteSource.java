@@ -33,7 +33,7 @@ import java.time.Instant;
 })
 public class FavoriteSource extends AbstractAggregateRoot<FavoriteSource> {
 
-    /** Unique constraint name shared with persistence layer. */
+    /** Unique constraint name shared with the persistence layer. */
     public static final String NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT = "uk_favorite_source_news_api_key_source_id";
 
     @Id
