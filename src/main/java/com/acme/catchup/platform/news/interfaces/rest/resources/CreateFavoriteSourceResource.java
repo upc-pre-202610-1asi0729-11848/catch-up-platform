@@ -5,12 +5,10 @@ import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
 /**
- * Resource record for creating a favorite source.
+ * Request resource, used to create a favorite source.
  *
- * @summary
- * This record represents the resource for creating a favorite source.
- * It contains the news API key and source ID.
- * The validation annotations are used to validate the resource and provide localized error messages.
+ * @param newsApiKey news API key associated with the favorite source
+ * @param sourceId source identifier to be marked as favorite
  * @since 1.0
  */
 public record CreateFavoriteSourceResource(

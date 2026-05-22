@@ -6,15 +6,17 @@ import com.acme.catchup.platform.news.domain.model.commands.CreateFavoriteSource
 import java.util.Optional;
 
 /**
- * @name FavoriteSourceCommandService
- * @summary
- * This interface represents the service to handle favorite source commands.
+ * Domain service defining the contract for favorite source command operations.
+ * Represents domain-level command handlers for creating favorite sources.
+ * Implementations abstract away infrastructure concerns while maintaining focus
+ * on domain invariants and business rules.
  */
 public interface FavoriteSourceCommandService {
     /**
-     * Handles the create favorite source command.
-     * @param command The create favorite source command.
-     * @return The created favorite source.
+     * Handles creation of a favorite source.
+     *
+     * @param command create a command containing the news API key and source ID
+     * @return the created favorite source, or empty when the request represents a duplicate favorite source
      *
      * @throws IllegalArgumentException If newsApiKey or source ID is null or empty
      * @see CreateFavoriteSourceCommand

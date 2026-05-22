@@ -16,11 +16,10 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 
 /**
- * FavoriteSourceCommandService Implementation
- *
- * @summary
- * Implementation of the FavoriteSourceCommandService interface.
- * It is responsible for handling favorite source commands.
+ * Application service implementing the favorite source command handler.
+ * Orchestrates the domain invariant that (newsApiKey, sourceId) must be unique.
+ * Handles duplicate key constraint violations by returning empty, implementing
+ * idempotency at the application layer rather than raising exceptions.
  *
  * @since 1.0
  */
@@ -63,6 +62,13 @@ public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandSe
         }
     }
 
+    /**
+     * Detects whether a data integrity violation corresponds to the favorite source
+     * unique constraint for {@code newsApiKey + sourceId}.
+     *
+     * @param exception persistence exception raised during save
+     * @return {@code true} when the exception chain contains the duplicate constraint name
+     */
     private boolean isDuplicateFavoriteSourceViolation(DataIntegrityViolationException exception) {
         Throwable violationCause = exception;
         while (violationCause != null) {

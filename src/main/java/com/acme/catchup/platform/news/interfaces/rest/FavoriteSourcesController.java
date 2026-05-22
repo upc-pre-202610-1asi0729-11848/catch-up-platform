@@ -33,9 +33,12 @@ import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
 /**
- * REST controller for favorite sources.
+ * Inbound service in the interface layer for the favorite sources bounded context.
+ * Orchestrates command and query operations: POST operations delegate to
+ * {@link FavoriteSourceCommandService}, GET operations to
+ * {@link FavoriteSourceQueryService}. Translates between HTTP Resources and
+ * domain models using assemblers that cross the interface/domain boundary.
  *
- * @summary This class provides REST endpoints for favorite sources.
  * @since 1.0
  */
 @RestController
@@ -54,6 +57,7 @@ public class FavoriteSourcesController {
      *
      * @param favoriteSourceCommandService Favorite source command service
      * @param favoriteSourceQueryService   Favorite source query service
+     * @param messageSource                source for localized response messages
      * @see FavoriteSourceCommandService
      * @see FavoriteSourceQueryService
      * @since 1.0
@@ -65,10 +69,10 @@ public class FavoriteSourcesController {
     }
 
     /**
-     * Creates a favorite source.
+     * Creates a new favorite source.
      *
-     * @param resource CreateFavoriteSourceResource containing the news API key and source ID
-     * @return ResponseEntity with the created favorite source resource, conflict if the favorite source already exists, or bad request otherwise.
+     * @param resource the request payload containing the news API key and source ID
+     * @return the created favorite source resource, or conflict when the pair already exists
      * @see CreateFavoriteSourceResource
      * @see FavoriteSourceResource
      * @since 1.0
@@ -149,13 +153,12 @@ public class FavoriteSourcesController {
     }
 
     /**
-     * Gets favorite sources with parameters.
-     *
-     * @param params Map of parameters including newsApiKey and optionally sourceId
-     * @return ResponseEntity with the favorite source resource or resources according to the parameters, or bad request if the parameters are invalid
-     * @summary This method gets favorite sources based on the parameters provided.
-     * If the parameters contain newsApiKey and sourceId, it gets the favorite source by news API key and source ID.
-     * If the parameters contain only newsApiKey, it gets all favorite sources by news API key.
+     * Retrieves favorite source data using query parameters.
+     * When both {@code newsApiKey} and {@code sourceId} are provided, a single
+     * favorite source is searched. When only {@code newsApiKey} is provided, all
+     * matching favorite sources are returned.
+     * @param params query parameters including required {@code newsApiKey} and optional {@code sourceId}
+     * @return a single favorite source, a list of favorite sources, or a bad request problem detail
      * @see FavoriteSourceResource
      * @since 1.0
      */
@@ -197,6 +200,12 @@ public class FavoriteSourcesController {
         }
     }
 
+    /**
+     * Validates a query parameter value against blank, size, and allowed-character constraints.
+     *
+     * @param value query parameter value to validate
+     * @return {@code true} when the value is invalid; otherwise {@code false}
+     */
     private boolean isInvalidQueryParam(String value) {
         return value.isBlank() || value.length() > MAX_QUERY_PARAM_LENGTH || !QUERY_PARAM_PATTERN.matcher(value).matches();
     }

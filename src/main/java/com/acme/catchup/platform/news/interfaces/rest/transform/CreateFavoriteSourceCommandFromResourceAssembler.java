@@ -4,7 +4,11 @@ import com.acme.catchup.platform.news.domain.model.commands.CreateFavoriteSource
 import com.acme.catchup.platform.news.interfaces.rest.resources.CreateFavoriteSourceResource;
 
 /**
- * Assembler to create a CreateFavoriteSourceCommand from a CreateFavoriteSourceResource.
+ * Interface layer translator converting HTTP inbound Resources to domain commands.
+ * Crosses the boundary between external representation ({@link CreateFavoriteSourceResource})
+ * and domain model ({@link CreateFavoriteSourceCommand}), enabling the inbound service
+ * to translate client input into domain-ready operations for the application layer.
+ *
  * @since 1.0
  */
 public class CreateFavoriteSourceCommandFromResourceAssembler {

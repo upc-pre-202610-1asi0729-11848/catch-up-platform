@@ -1,9 +1,9 @@
 package com.acme.catchup.platform.news.domain.model.queries;
 
 /**
- * @summary
- * This class represents the query to get all favorite sources by newsApiKey.
- * @param newsApiKey - the newsApiKey to get all favorite sources.
+ * Query for retrieving all favorite sources by news API key.
+ *
+ * @param newsApiKey news API key used to filter favorite sources
  */
 public record GetAllFavoriteSourcesByNewsApiKeyQuery(String newsApiKey) {
     public GetAllFavoriteSourcesByNewsApiKeyQuery {

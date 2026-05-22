@@ -1,10 +1,8 @@
 package com.acme.catchup.platform.news.domain.model.commands;
 
 /**
- * CreateFavoriteSourceCommand
+ * Command for creating a favorite news source.
  *
- * @summary
- * Record that represents the command to create a favorite news source.
  * @param newsApiKey the News API key — must not be null or blank
  * @param sourceId   the news source identifier — must not be null or blank
  */

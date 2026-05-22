@@ -11,11 +11,18 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import java.time.Instant;
 
 /**
- * FavoriteSource Aggregate Root
+ * Aggregate root enforcing the domain invariant: each news API key can have
+ * at most one favorite marking per news source.
  *
- * @summary
- * The FavoriteSource class is an aggregate root that represents a favorite news source.
- * It is responsible for handling the {@link CreateFavoriteSourceCommand} command.
+ * A FavoriteSource represents a user's explicit interest in tracking a specific
+ * news source within their news API context. The aggregate maintains these
+ * invariants:
+ * - Composite key (newsApiKey, sourceId) must be unique; only one FavoriteSource
+ *   per user-source pair can exist
+ * - Both newsApiKey and sourceId are required (non-null, non-blank)
+ *
+ * Created by {@link CreateFavoriteSourceCommand}.
+ *
  * @since 1.0
  */
 @Getter
@@ -50,9 +57,9 @@ public class FavoriteSource extends AbstractAggregateRoot<FavoriteSource> {
     protected FavoriteSource() {}
 
     /**
-     * @summary Constructor.
-     * It creates a new FavoriteSource instance based on the CreateFavoriteSourceCommand command.
-     * @param command - the CreateFavoriteSourceCommand command
+     * Creates a favorite source aggregate from a create command.
+     *
+     * @param command command containing the news API key and source ID
      */
     public FavoriteSource(CreateFavoriteSourceCommand command) {
         this.newsApiKey = command.newsApiKey();

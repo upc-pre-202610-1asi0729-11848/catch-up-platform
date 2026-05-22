@@ -9,33 +9,39 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * @name FavoriteSourceQueryService
+ * Domain query service providing read access to favorite sources.
+ * Defines query specifications essential to the domain model, supporting
+ * query handlers within the bounded context that retrieve and build
+ * representations necessary for command and response operations.
  *
- * @summary
- * This interface represents the service to handle favorite source queries.
  * @since 1.0.0
  */
 public interface FavoriteSourceQueryService {
     /**
-     * Handles the get all favorite sources by newsApiKey query.
-     * @param query The get all favorite sources by newsApiKey query.
-     * @return The list of favorite sources if exists.
+     * Retrieves all favorite sources associated with a news API key.
+     *
+     * @param query query containing the target news API key
+     * @return list of favorite sources, possibly empty
      * @throws IllegalArgumentException If newsApiKey is null or empty
      * @see GetAllFavoriteSourcesByNewsApiKeyQuery
      */
     List<FavoriteSource> handle(GetAllFavoriteSourcesByNewsApiKeyQuery query);
+
     /**
-     * Handles the get favorite source by id query.
-     * @param query The get favorite source by id query.
-     * @return The favorite source if exists.
+     * Retrieves a favorite source by its identifier.
+     *
+     * @param query query containing the favorite source identifier
+     * @return favorite source when found, otherwise empty
      * @throws IllegalArgumentException If id is null or empty
      * @see GetFavoriteSourceByIdQuery
      */
     Optional<FavoriteSource> handle(GetFavoriteSourceByIdQuery query);
+
     /**
-     * Handles the get favorite source by newsApiKey and sourceId query.
-     * @param query The get favorite source by newsApiKey and sourceId query.
-     * @return The favorite source if exists.
+     * Retrieves a favorite source by the composite key of news API key and source ID.
+     *
+     * @param query query containing news API key and source ID
+     * @return favorite source when found, otherwise empty
      * @throws IllegalArgumentException If newsApiKey or source ID is null or empty
      * @see GetFavoriteSourceByNewsApiKeyAndSourceIdQuery
      */

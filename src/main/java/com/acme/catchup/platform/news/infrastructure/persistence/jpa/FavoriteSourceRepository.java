@@ -8,10 +8,13 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * JPA repository for FavoriteSource entity.
- * @summary
- * This interface extends JpaRepository to provide CRUD operations for FavoriteSource entity.
- * It extends Spring Data JpaRepository with FavoriteSource as the entity type and Long as the ID type.
+ * Repository for querying and persisting {@link FavoriteSource} aggregates.
+ * Provides collection-like access to FavoriteSource roots, supporting queries
+ * essential to maintaining domain invariants:
+ * - {@code findByNewsApiKeyAndSourceId()} checks the unique (newsApiKey, sourceId) invariant
+ * - {@code findAllByNewsApiKey()} retrieves all favorites for a user's API context
+ * - {@code existsByNewsApiKeyAndSourceId()} tests invariant satisfaction
+ *
  * @since 1.0
  */
 @Repository

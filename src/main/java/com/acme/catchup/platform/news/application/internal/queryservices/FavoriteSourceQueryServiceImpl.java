@@ -15,11 +15,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * FavoriteSourceQueryService Implementation
- *
- * @summary
- * Implementation of the FavoriteSourceQueryService interface.
- * It is responsible for handling favorite source queries.
+ * Application service implementing the favorite source query handler.
+ * Translates domain query specifications into persistence operations, returning
+ * domain models from storage to support application queries.
  *
  * @since 1.0
  */

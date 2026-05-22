@@ -1,10 +1,11 @@
 package com.acme.catchup.platform.news.interfaces.rest.resources;
 
 /**
- * Resource record for a favorite source.
- * @summary
- * This record represents the resource for a favorite source.
- * It contains the ID, news API key, and source ID.
+ * Response resource representing a favorite source.
+ *
+ * @param id persistent identifier
+ * @param newsApiKey news API key associated with the favorite source
+ * @param sourceId source identifier marked as favorite
  * @since 1.0
  */
 public record FavoriteSourceResource(Long id, String newsApiKey, String sourceId) {

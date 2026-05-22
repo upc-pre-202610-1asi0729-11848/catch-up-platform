@@ -14,10 +14,14 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- * Global exception handler for the application.
- * @summary
- * This class handles exceptions thrown by REST controllers.
- * It includes support for localized error messages.
+ * Interface layer exception handler translating domain and validation errors
+ * to HTTP problem responses. Handles:
+ * - {@link IllegalArgumentException}: domain invariant violations and input validation
+ * - {@link MethodArgumentNotValidException}: Resource validation failures from
+ *   Jakarta Bean Validation
+ * Localizes error messages per request locale, forming the error translation boundary
+ * between domain logic and HTTP clients.
+ *
  * @since 1.0
  */
 @RestControllerAdvice

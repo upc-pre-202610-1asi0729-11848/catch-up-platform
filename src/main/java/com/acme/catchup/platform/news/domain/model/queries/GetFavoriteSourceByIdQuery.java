@@ -1,9 +1,9 @@
 package com.acme.catchup.platform.news.domain.model.queries;
 
 /**
- * @summary
- * This class represents the query to get a favorite source by its id.
- * @param id - the id of the favorite source.
+ * Query for retrieving a favorite source by its identifier.
+ *
+ * @param id favorite source identifier
  */
 public record GetFavoriteSourceByIdQuery(Long id) {
     public GetFavoriteSourceByIdQuery {

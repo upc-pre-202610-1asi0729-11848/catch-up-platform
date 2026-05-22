@@ -4,7 +4,11 @@ import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.interfaces.rest.resources.FavoriteSourceResource;
 
 /**
- * Assembler to create a FavoriteSourceResource from a FavoriteSource entity.
+ * Interface layer translator converting domain aggregates to HTTP outbound Resources.
+ * Crosses the boundary between the domain model ({@link FavoriteSource}) and external
+ * representation ({@link FavoriteSourceResource}), enabling the inbound service
+ * to serialize domain responses into client-facing HTTP representations.
+ *
  * @since 1.0
  */
 public class FavoriteSourceResourceFromEntityAssembler {
