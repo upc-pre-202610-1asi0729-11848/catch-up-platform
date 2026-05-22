@@ -25,11 +25,11 @@ public interface FavoriteSourceRepository extends JpaRepository<FavoriteSource, 
 
     /**
      * Check if a favorite source exists by news API key and source ID.
-     * @param newApiKey News API key
+     * @param newsApiKey News API key
      * @param sourceId Source ID
      * @return True if exists, false otherwise
      */
-    boolean existsByNewsApiKeyAndSourceId(String newApiKey, String sourceId);
+    boolean existsByNewsApiKeyAndSourceId(String newsApiKey, String sourceId);
 
     /**
      * Find a favorite source by news API key and source ID.
