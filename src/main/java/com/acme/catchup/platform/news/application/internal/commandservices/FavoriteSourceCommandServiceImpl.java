@@ -4,6 +4,7 @@ import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.domain.model.commands.CreateFavoriteSourceCommand;
 import com.acme.catchup.platform.news.domain.services.FavoriteSourceCommandService;
 import com.acme.catchup.platform.news.infrastructure.persistence.jpa.FavoriteSourceRepository;
+import static com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource.NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.MessageSource;
@@ -25,7 +26,7 @@ import java.util.Optional;
  */
 @Service
 public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandService {
-    private static final String DUPLICATE_FAVORITE_SOURCE_CONSTRAINT = "uk_favorite_source_news_api_key_source_id";
+    private static final String DUPLICATE_FAVORITE_SOURCE_CONSTRAINT = NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT;
     private final FavoriteSourceRepository favoriteSourceRepository;
     private static final Logger LOGGER = LoggerFactory.getLogger(FavoriteSourceCommandServiceImpl.class);
     private final MessageSource messageSource;
