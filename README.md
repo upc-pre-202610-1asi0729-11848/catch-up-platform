@@ -4,6 +4,11 @@
 
 Catch-Up Platform is a Spring Boot service that provides a REST API to manage users' favorite news sources. The project is structured around Domain-Driven Design (DDD), organized into bounded contexts (`news` and `shared`), using CQRS-style application services and JPA persistence.
 
+This service is designed to work with [NewsAPI.org](https://newsapi.org/):
+- `newsApiKey` refers to an API key issued by NewsAPI.org
+- `sourceId` refers to a NewsAPI.org source identifier (for example, `bbc-news`)
+- This service stores favorite source mappings; it does not proxy NewsAPI.org content endpoints
+
 ## Features
 
 - List favorite sources scoped to a News API key
@@ -26,7 +31,7 @@ Catch-Up Platform is a Spring Boot service that provides a REST API to manage us
 
 - OpenJDK 26
 - MySQL 8+ (database server)
-- Docker (optional, to run container image)
+- Docker (optional for local testing, recommended for deployment packaging)
 
 ## Environment variables
 
@@ -91,23 +96,32 @@ java -jar target/*.jar
 
 ## Run with Docker
 
+The `Dockerfile` is intended for deployment-style packaging:
+- it builds the application in a multi-stage image
+- it runs the application with `SPRING_PROFILES_ACTIVE=prod` by default
+- it expects database connection settings to be provided via environment variables at runtime
+
 Build the container image:
 
 ```bash
 docker build -t catch-up-platform:local .
 ```
 
-Run the container (supply database credentials via `-e`):
+Run the container (deployment-style execution; supply required runtime env vars):
 
 ```bash
 docker run --rm -p 8080:8080 \
   -e DATABASE_USER=your_db_user \
   -e DATABASE_PASSWORD=your_db_password \
   -e DATABASE_URL=jdbc:mysql://your_db_host:3306/catch-up-os \
+  -e DATABASE_PORT=3306 \
+  -e DATABASE_NAME=catch-up-os \
   -e SPRING_PROFILES_ACTIVE=prod \
   --name catch-up-platform \
   catch-up-platform:local
 ```
+
+For cloud/container platforms, inject the same variables using the platform's secret/config mechanism instead of hardcoding values.
 
 ## Notes
 
