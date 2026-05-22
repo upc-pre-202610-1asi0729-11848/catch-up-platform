@@ -14,7 +14,7 @@ Catch-Up Platform is a small Spring Boot service that provides an API to manage 
 
 ## Technologies
 
-- Java 25+ and Spring Boot
+- OpenJDK 26 and Spring Boot 4.0.6
 - Spring Web (REST controllers)
 - Spring Data JPA (Hibernate)
 - Lombok (compile-time helpers)
