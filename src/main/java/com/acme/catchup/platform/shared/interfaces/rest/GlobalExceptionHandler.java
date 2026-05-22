@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.util.Locale;
+import java.util.stream.Collectors;
 
 /**
  * Global exception handler for the application.
@@ -35,14 +36,14 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorResponse handleException(MethodArgumentNotValidException exception, Locale locale) {
-        String message = exception.getFieldErrors().stream()
+        String prefix = messageSource.getMessage("errors.found", null, locale);
+        String fields = exception.getFieldErrors().stream()
                 .map(fieldError -> messageSource.getMessage(fieldError, locale))
-                .reduce(messageSource.getMessage("errors.found", null,
-                        locale), String::concat);
+                .collect(Collectors.joining(", "));
         return ErrorResponse.create(
                 exception,
                 HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()),
-                message
+                prefix + " " + fields
         );
     }
 
@@ -55,7 +56,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     ErrorResponse handleException(IllegalArgumentException exception, Locale locale) {
-        String message = messageSource.getMessage(exception.getMessage(), null, locale);
+        String key = exception.getMessage();
+        String message = messageSource.getMessage(key, null, key, locale);
         return ErrorResponse.create(exception, HttpStatusCode.valueOf(HttpStatus.BAD_REQUEST.value()), message);
     }
 
