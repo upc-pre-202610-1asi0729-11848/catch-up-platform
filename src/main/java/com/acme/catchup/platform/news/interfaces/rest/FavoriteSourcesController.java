@@ -22,6 +22,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
@@ -202,13 +203,13 @@ public class FavoriteSourcesController {
             log.warn("Rejected invalid query param newsApiKey (value omitted for security)");
             return ResponseEntity.badRequest().body(
                     ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            "Invalid parameter: newsApiKey"));
+                            localizedMessage("favorite.source.error.newsApiKey.invalid")));
         }
         if (sourceId != null && isInvalidQueryParam(sourceId)) {
-            log.warn("Rejected invalid query param sourceId={}", sourceId);
+            log.warn("Rejected invalid query param sourceId (value omitted for security)");
             return ResponseEntity.badRequest().body(
                     ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            "Invalid parameter: sourceId"));
+                            localizedMessage("favorite.source.error.sourceId.invalid")));
         }
         if (newsApiKey != null && !newsApiKey.isBlank() && sourceId != null && !sourceId.isBlank()) {
             log.debug("GET /api/v1/favorite-sources?newsApiKey={}&sourceId={}", mask(newsApiKey), sourceId);
@@ -220,8 +221,19 @@ public class FavoriteSourcesController {
             log.warn("GET /api/v1/favorite-sources – missing or blank required parameter: newsApiKey");
             return ResponseEntity.badRequest().body(
                     ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            "Missing or blank required parameter: newsApiKey"));
+                            localizedMessage("favorite.source.error.newsApiKey.missing")));
         }
+    }
+
+    /**
+     * Resolves a localized message for the given key using the request locale,
+     * falling back to the key itself when no translation is found.
+     *
+     * @param key message key to resolve
+     * @return localized message string
+     */
+    private String localizedMessage(String key) {
+        return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
     }
 
     /**
