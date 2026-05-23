@@ -9,9 +9,9 @@ import com.acme.catchup.platform.news.domain.model.queries.GetFavoriteSourceByNe
 import com.acme.catchup.platform.news.interfaces.rest.resources.CreateFavoriteSourceResource;
 import com.acme.catchup.platform.news.interfaces.rest.resources.FavoriteSourceResource;
 import com.acme.catchup.platform.news.interfaces.rest.transform.CreateFavoriteSourceCommandFromResourceAssembler;
-import com.acme.catchup.platform.news.interfaces.rest.transform.FavoriteSourceResourceFromEntityAssembler;
 import com.acme.catchup.platform.news.interfaces.rest.transform.NewsValueObjectFromStringAssembler;
 import com.acme.catchup.platform.news.interfaces.rest.transform.ResponseEntityFromFavoriteSourceCommandResultAssembler;
+import com.acme.catchup.platform.news.interfaces.rest.transform.ResponseEntityFromFavoriteSourceQueryResultAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -22,13 +22,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.MessageSource;
-import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
@@ -132,10 +129,12 @@ public class FavoriteSourcesController {
         Optional<FavoriteSource> favoriteSource = favoriteSourceQueryService.handle(new GetFavoriteSourceByIdQuery(id));
         if (favoriteSource.isEmpty()) {
             log.debug("Favorite source not found for id={}", id);
-            return notFound("favorite.source.error.notFoundById", id);
+            return ResponseEntityFromFavoriteSourceQueryResultAssembler.notFound(
+                    messageSource,
+                    "favorite.source.error.notFoundById",
+                    id);
         }
-        return favoriteSource.map(source -> ResponseEntity.ok(FavoriteSourceResourceFromEntityAssembler.toResourceFromEntity(source)))
-                .orElseThrow();
+        return ResponseEntityFromFavoriteSourceQueryResultAssembler.toResponseEntityFromFavoriteSource(favoriteSource.orElseThrow());
     }
 
     /**
@@ -146,14 +145,11 @@ public class FavoriteSourcesController {
      * @see FavoriteSourceResource
      * @since 1.0
      */
-    private ResponseEntity<List<FavoriteSourceResource>> getAllFavoriteSourcesByNewsApiKey(String newsApiKey) {
+    private ResponseEntity<?> getAllFavoriteSourcesByNewsApiKey(String newsApiKey) {
         var getAllFavoriteSourcesByNewsApiKeyQuery = new GetAllFavoriteSourcesByNewsApiKeyQuery(
                 NewsValueObjectFromStringAssembler.toNewsApiKeyFromString(newsApiKey));
         var favoriteSources = favoriteSourceQueryService.handle(getAllFavoriteSourcesByNewsApiKeyQuery);
-        var favoriteSourceResources = favoriteSources.stream()
-                .map(FavoriteSourceResourceFromEntityAssembler::toResourceFromEntity)
-                .toList();
-        return ResponseEntity.ok(favoriteSourceResources);
+        return ResponseEntityFromFavoriteSourceQueryResultAssembler.toResponseEntityFromList(favoriteSources);
     }
 
     /**
@@ -172,10 +168,11 @@ public class FavoriteSourcesController {
         var favoriteSource = favoriteSourceQueryService.handle(getFavoriteSourceByNewsApiKeyAndSourceIdQuery);
         if (favoriteSource.isEmpty()) {
             log.debug("Favorite source not found for newsApiKey={}, sourceId={}", mask(newsApiKey), sourceId);
-            return notFound("favorite.source.error.notFoundByNewsApiKeyAndSourceId");
+            return ResponseEntityFromFavoriteSourceQueryResultAssembler.notFound(
+                    messageSource,
+                    "favorite.source.error.notFoundByNewsApiKeyAndSourceId");
         }
-        return favoriteSource.map(source -> ResponseEntity.ok(FavoriteSourceResourceFromEntityAssembler.toResourceFromEntity(source)))
-                .orElseThrow();
+        return ResponseEntityFromFavoriteSourceQueryResultAssembler.toResponseEntityFromFavoriteSource(favoriteSource.orElseThrow());
     }
 
     /**
@@ -210,15 +207,15 @@ public class FavoriteSourcesController {
             @RequestParam(name = "sourceId", required = false) String sourceId) {
         if (newsApiKey != null && isInvalidQueryParam(newsApiKey)) {
             log.warn("Rejected invalid query param newsApiKey (value omitted for security)");
-            return ResponseEntity.badRequest().body(
-                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            localizedMessage("favorite.source.error.newsApiKey.invalid")));
+            return ResponseEntityFromFavoriteSourceQueryResultAssembler.badRequest(
+                    messageSource,
+                    "favorite.source.error.newsApiKey.invalid");
         }
         if (sourceId != null && isInvalidQueryParam(sourceId)) {
             log.warn("Rejected invalid query param sourceId (value omitted for security)");
-            return ResponseEntity.badRequest().body(
-                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            localizedMessage("favorite.source.error.sourceId.invalid")));
+            return ResponseEntityFromFavoriteSourceQueryResultAssembler.badRequest(
+                    messageSource,
+                    "favorite.source.error.sourceId.invalid");
         }
         if (newsApiKey != null && !newsApiKey.isBlank() && sourceId != null && !sourceId.isBlank()) {
             log.debug("GET /api/v1/favorite-sources?newsApiKey={}&sourceId={}", mask(newsApiKey), sourceId);
@@ -228,34 +225,10 @@ public class FavoriteSourcesController {
             return getAllFavoriteSourcesByNewsApiKey(newsApiKey);
         } else {
             log.warn("GET /api/v1/favorite-sources – missing or blank required parameter: newsApiKey");
-            return ResponseEntity.badRequest().body(
-                    ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST,
-                            localizedMessage("favorite.source.error.newsApiKey.missing")));
+            return ResponseEntityFromFavoriteSourceQueryResultAssembler.badRequest(
+                    messageSource,
+                    "favorite.source.error.newsApiKey.missing");
         }
-    }
-
-    /**
-     * Resolves a localized message for the given key using the request locale,
-     * falling back to the key itself when no translation is found.
-     *
-     * @param key message key to resolve
-     * @return localized message string
-     */
-    private String localizedMessage(String key) {
-        return messageSource.getMessage(key, null, key, LocaleContextHolder.getLocale());
-    }
-
-    /**
-     * Builds a localized 404-response body for not-found scenarios.
-     *
-     * @param key message key to resolve
-     * @param args optional arguments for message formatting
-     * @return response entity containing localized {@link ProblemDetail}
-     */
-    private ResponseEntity<ProblemDetail> notFound(String key, Object... args) {
-        var detail = messageSource.getMessage(key, args, key, LocaleContextHolder.getLocale());
-        return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, detail));
     }
 
     /**
