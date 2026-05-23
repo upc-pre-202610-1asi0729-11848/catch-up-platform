@@ -42,7 +42,11 @@ package "news" {
     interface FavoriteSourceCommandService <<application-service>> {
       +handle(CreateFavoriteSourceCommand) : Result<FavoriteSource, FavoriteSourceCommandFailure>
     }
-    class FavoriteSourceCommandFailure <<failure>> {
+    interface FavoriteSourceCommandFailure <<failure>> {
+      +messageKey() : String
+    }
+    class FavoriteSourceCommandFailureDuplicate <<failure>> {
+      +messageKey() : String
     }
   }
 
@@ -71,56 +75,73 @@ package "news" {
   package "domain.model.aggregates" {
     class FavoriteSource <<aggregate-root>> {
       - Long id
-      - String newsApiKey
-      - String sourceId
-      - Date createdAt
-      - Date updatedAt
+      - NewsApiKey newsApiKey
+      - SourceId sourceId
+      - Instant createdAt
+      - Instant updatedAt
       + FavoriteSource(CreateFavoriteSourceCommand)
       +getId() : Long
-      +getNewsApiKey() : String
-      +getSourceId() : String
+      +getNewsApiKey() : NewsApiKey
+      +getSourceId() : SourceId
     }
   }
 
   package "domain.model.commands" {
     class CreateFavoriteSourceCommand <<command>> {
-      +String newsApiKey
-      +String sourceId
-      +CreateFavoriteSourceCommand(String newsApiKey, String sourceId)
+      +NewsApiKey newsApiKey
+      +SourceId sourceId
+      +CreateFavoriteSourceCommand(NewsApiKey newsApiKey, SourceId sourceId)
     }
   }
 
   package "domain.model.queries" {
     class GetAllFavoriteSourcesByNewsApiKeyQuery <<query>> {
-      +String newsApiKey
+      +NewsApiKey newsApiKey
     }
     class GetFavoriteSourceByIdQuery <<query>> {
       +Long id
     }
     class GetFavoriteSourceByNewsApiKeyAndSourceIdQuery <<query>> {
-      +String newsApiKey
-      +String sourceId
+      +NewsApiKey newsApiKey
+      +SourceId sourceId
     }
   }
 
-  package "shared.application.result" {
-    interface Result <<result>> {
+  package "domain.model.valueobjects" {
+    class NewsApiKey <<value-object>> {
+      +String value
+    }
+    class SourceId <<value-object>> {
+      +String value
     }
   }
+
+
 
   package "infrastructure.persistence.jpa" {
     interface FavoriteSourceRepository <<repository>> {
-      +List<FavoriteSource> findAllByNewsApiKey(String newsApiKey)
-      +boolean existsByNewsApiKeyAndSourceId(String newsApiKey, String sourceId)
-      +Optional<FavoriteSource> findByNewsApiKeyAndSourceId(String newsApiKey, String sourceId)
-      +Optional<FavoriteSource> findById(Long id)
-      +FavoriteSource save(FavoriteSource entity)
+      +List<FavoriteSource> findAllByNewsApiKey(NewsApiKey newsApiKey)
+      +boolean existsByNewsApiKeyAndSourceId(NewsApiKey newsApiKey, SourceId sourceId)
+      +Optional<FavoriteSource> findByNewsApiKeyAndSourceId(NewsApiKey newsApiKey, SourceId sourceId)
     }
   }
 
 }
 
 package "shared" {
+    package "interfaces.rest" {
+      class GlobalExceptionHandler <<exception-handler>> {
+        +handleException(MethodArgumentNotValidException, Locale) : ErrorResponse
+        +handleException(IllegalArgumentException, Locale) : ErrorResponse
+      }
+
+    }
+
+    package "application.result" {
+      interface Result<T, E> <<result>> {
+      }
+    }
+
     package "infrastructure.persistence.jpa" {
       class SnakeCasePhysicalNamingStrategy <<strategy>> {
         +toPhysicalCatalogName(Identifier, JdbcEnvironment) : Identifier
@@ -142,6 +163,7 @@ FavoriteSourcesController --> ResponseEntityFromFavoriteSourceCommandResultAssem
 
 FavoriteSourceCommandServiceImpl ..|> FavoriteSourceCommandService : implements
 FavoriteSourceQueryServiceImpl ..|> FavoriteSourceQueryService : implements
+FavoriteSourceCommandFailureDuplicate ..|> FavoriteSourceCommandFailure : implements
 FavoriteSourceCommandService --> Result : returns
 FavoriteSourceCommandService --> FavoriteSourceCommandFailure : returns
 
@@ -160,7 +182,17 @@ FavoriteSourceResourceFromEntityAssembler --> FavoriteSourceResource : produces
 CreateFavoriteSourceCommandFromResourceAssembler ..> CreateFavoriteSourceResource : reads
 CreateFavoriteSourceCommandFromResourceAssembler --> CreateFavoriteSourceCommand : produces
 
-CreateFavoriteSourceCommand --> FavoriteSource : constructs
+FavoriteSource --> CreateFavoriteSourceCommand : constructs from
+
+FavoriteSource --> NewsApiKey : has
+FavoriteSource --> SourceId : has
+CreateFavoriteSourceCommand --> NewsApiKey : has
+CreateFavoriteSourceCommand --> SourceId : has
+GetAllFavoriteSourcesByNewsApiKeyQuery --> NewsApiKey : has
+GetFavoriteSourceByNewsApiKeyAndSourceIdQuery --> NewsApiKey : has
+GetFavoriteSourceByNewsApiKeyAndSourceIdQuery --> SourceId : has
+FavoriteSourceRepository --> NewsApiKey : uses
+FavoriteSourceRepository --> SourceId : uses
 
  ' Note about repository placement
 note bottom
