@@ -42,10 +42,9 @@ The application resolves credentials and connection details from environment var
 |---------------------|--------------------------------------------------|
 | `DATABASE_USER`     | MySQL username                                   |
 | `DATABASE_PASSWORD` | MySQL password                                   |
-| `DATABASE_URL`      | JDBC URL (default profile uses `localhost:3306`) |
+| `DATABASE_URL`      | Database host / hostname used by the production profile |
 | `DATABASE_NAME`     | Database name (default: `catch-up-os`)           |
 | `DATABASE_PORT`     | Database port (production profile)               |
-| `PORT`              | Application port (default: `8080`)               |
 
 ## Spring profiles
 
@@ -53,7 +52,7 @@ The application resolves credentials and connection details from environment var
 |-------------|------------------------------------------------------------|
 | *(default)* | Uses `localhost:3306` with SSL enabled; SQL logging off    |
 | `dev`       | Uses `localhost:3306` with SSL disabled; SQL logging on    |
-| `prod`      | Reads full connection URL from env vars; used in Docker/CI |
+| `prod`      | Builds the JDBC URL from env vars; used in Docker/CI |
 
 Set the active profile with:
 
@@ -95,6 +94,12 @@ export SPRING_PROFILES_ACTIVE=dev
 ./mvnw spring-boot:run
 ```
 
+For the `prod` profile, also provide:
+
+- `DATABASE_URL` (database host / hostname)
+- `DATABASE_PORT` (database port)
+- `DATABASE_NAME` (database name)
+
 Or build and run the jar:
 
 ```bash
@@ -121,7 +126,7 @@ Run the container (deployment-style execution; supply required runtime env vars)
 docker run --rm -p 8080:8080 \
   -e DATABASE_USER=your_db_user \
   -e DATABASE_PASSWORD=your_db_password \
-  -e DATABASE_URL=jdbc:mysql://your_db_host:3306/catch-up-os \
+  -e DATABASE_URL=your_db_host \
   -e DATABASE_PORT=3306 \
   -e DATABASE_NAME=catch-up-os \
   -e SPRING_PROFILES_ACTIVE=prod \
