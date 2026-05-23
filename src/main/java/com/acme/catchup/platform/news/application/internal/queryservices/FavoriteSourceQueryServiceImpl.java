@@ -1,10 +1,10 @@
 package com.acme.catchup.platform.news.application.internal.queryservices;
 
+import com.acme.catchup.platform.news.application.queryservices.FavoriteSourceQueryService;
 import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.domain.model.queries.GetAllFavoriteSourcesByNewsApiKeyQuery;
 import com.acme.catchup.platform.news.domain.model.queries.GetFavoriteSourceByIdQuery;
 import com.acme.catchup.platform.news.domain.model.queries.GetFavoriteSourceByNewsApiKeyAndSourceIdQuery;
-import com.acme.catchup.platform.news.domain.services.FavoriteSourceQueryService;
 import com.acme.catchup.platform.news.infrastructure.persistence.jpa.FavoriteSourceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

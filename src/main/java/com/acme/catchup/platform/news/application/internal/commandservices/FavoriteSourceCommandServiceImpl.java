@@ -1,8 +1,9 @@
 package com.acme.catchup.platform.news.application.internal.commandservices;
 
+import com.acme.catchup.platform.news.application.commandservices.FavoriteSourceCommandFailure;
+import com.acme.catchup.platform.news.application.commandservices.FavoriteSourceCommandService;
 import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.domain.model.commands.CreateFavoriteSourceCommand;
-import com.acme.catchup.platform.news.domain.services.FavoriteSourceCommandService;
 import com.acme.catchup.platform.news.infrastructure.persistence.jpa.FavoriteSourceRepository;
 import static com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource.NEWS_API_KEY_SOURCE_ID_UNIQUE_CONSTRAINT;
 import org.slf4j.Logger;
@@ -13,14 +14,16 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
+import com.acme.catchup.platform.shared.application.result.Result;
+
+import java.util.Objects;
 
 /**
  * Application service for favorite source command operations.
  * Contains the command handler method that orchestrates the domain invariant
  * ensuring (newsApiKey, sourceId) must be unique.
- * Handles duplicate key constraint violations by returning empty, implementing
- * idempotency at the application layer rather than raising exceptions.
+ * Handles duplicate key constraint violations by returning an application-layer failure,
+ * implementing idempotency at the application layer rather than raising exceptions.
  *
  * @since 1.0
  */
@@ -42,10 +45,9 @@ public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandSe
      */
     @Override
     @Transactional
-    public Optional<FavoriteSource> handle(CreateFavoriteSourceCommand command) {
+    public Result<FavoriteSource, FavoriteSourceCommandFailure> handle(CreateFavoriteSourceCommand command) {
         if (favoriteSourceRepository.existsByNewsApiKeyAndSourceId(command.newsApiKey(), command.sourceId())) {
-            LOGGER.warn(messageSource.getMessage("favorite.source.error.duplicate", null, LocaleContextHolder.getLocale()));
-            return Optional.empty();
+            return duplicateResult();
         }
         try {
             var favoriteSource = new FavoriteSource(command);
@@ -56,15 +58,22 @@ public class FavoriteSourceCommandServiceImpl implements FavoriteSourceCommandSe
                     createdFavoriteSource.getId(),
                     createdFavoriteSource.getCreatedAt(),
                     createdFavoriteSource.getUpdatedAt());
-            return Optional.of(createdFavoriteSource);
+            return Result.success(createdFavoriteSource);
         } catch (DataIntegrityViolationException exception) {
             if (isDuplicateFavoriteSourceViolation(exception)) {
                 // Invariant violation: Duplicate favorite source
-                LOGGER.warn(messageSource.getMessage("favorite.source.error.duplicate", null, LocaleContextHolder.getLocale()));
-                return Optional.empty();
+                return duplicateResult();
             }
             throw exception;
         }
+    }
+
+    private Result<FavoriteSource, FavoriteSourceCommandFailure> duplicateResult() {
+        var duplicateFailure = new FavoriteSourceCommandFailure.Duplicate();
+        LOGGER.warn(Objects.requireNonNullElse(
+                messageSource.getMessage(duplicateFailure.messageKey(), null, LocaleContextHolder.getLocale()),
+                duplicateFailure.messageKey()));
+        return Result.failure(duplicateFailure);
     }
 
     /**

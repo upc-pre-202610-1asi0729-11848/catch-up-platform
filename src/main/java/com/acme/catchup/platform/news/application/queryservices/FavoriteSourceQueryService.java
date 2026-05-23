@@ -1,4 +1,4 @@
-package com.acme.catchup.platform.news.domain.services;
+package com.acme.catchup.platform.news.application.queryservices;
 
 import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.domain.model.queries.GetAllFavoriteSourcesByNewsApiKeyQuery;
@@ -9,10 +9,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Domain query service providing read access to favorite sources.
- * Defines query specifications essential to the domain model, supporting
- * query handlers within the bounded context that retrieve and build
- * representations necessary for command and response operations.
+ * Application service contract providing read access to favorite sources.
+ * It exposes query operations used by the interface layer to retrieve favorite
+ * sources without leaking persistence details.
  *
  * @since 1.0.0
  */
@@ -47,3 +46,5 @@ public interface FavoriteSourceQueryService {
      */
     Optional<FavoriteSource> handle(GetFavoriteSourceByNewsApiKeyAndSourceIdQuery query);
 }
+
+

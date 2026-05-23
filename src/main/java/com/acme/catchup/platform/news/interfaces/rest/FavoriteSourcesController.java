@@ -1,15 +1,16 @@
 package com.acme.catchup.platform.news.interfaces.rest;
 
+import com.acme.catchup.platform.news.application.commandservices.FavoriteSourceCommandService;
+import com.acme.catchup.platform.news.application.queryservices.FavoriteSourceQueryService;
 import com.acme.catchup.platform.news.domain.model.aggregates.FavoriteSource;
 import com.acme.catchup.platform.news.domain.model.queries.GetAllFavoriteSourcesByNewsApiKeyQuery;
 import com.acme.catchup.platform.news.domain.model.queries.GetFavoriteSourceByIdQuery;
 import com.acme.catchup.platform.news.domain.model.queries.GetFavoriteSourceByNewsApiKeyAndSourceIdQuery;
-import com.acme.catchup.platform.news.domain.services.FavoriteSourceCommandService;
-import com.acme.catchup.platform.news.domain.services.FavoriteSourceQueryService;
 import com.acme.catchup.platform.news.interfaces.rest.resources.CreateFavoriteSourceResource;
 import com.acme.catchup.platform.news.interfaces.rest.resources.FavoriteSourceResource;
 import com.acme.catchup.platform.news.interfaces.rest.transform.CreateFavoriteSourceCommandFromResourceAssembler;
 import com.acme.catchup.platform.news.interfaces.rest.transform.FavoriteSourceResourceFromEntityAssembler;
+import com.acme.catchup.platform.news.interfaces.rest.transform.ResponseEntityFromFavoriteSourceCommandResultAssembler;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -32,12 +33,15 @@ import java.util.regex.Pattern;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
 
+import com.acme.catchup.platform.shared.application.result.Result;
+
 /**
  * Inbound service in the interface layer for the favorite sources bounded context.
- * Orchestrates command and query operations: POST operations delegate to
- * {@link FavoriteSourceCommandService}, GET operations to
- * {@link FavoriteSourceQueryService}. Translates between HTTP Resources and
- * domain models using assemblers that cross the interface/domain boundary.
+ * Orchestrates command and query operations through the application layer:
+ * POST operations delegate to {@link FavoriteSourceCommandService}, which returns
+ * a {@link Result} describing success or duplicate conflict; GET operations delegate
+ * to {@link FavoriteSourceQueryService}. Translates between HTTP Resources and domain
+ * models using assemblers that cross the interface/domain boundary.
  *
  * @since 1.0
  */
@@ -94,14 +98,9 @@ public class FavoriteSourcesController {
     })
     @PostMapping
     public ResponseEntity<?> createFavoriteSource(@Valid @RequestBody CreateFavoriteSourceResource resource) {
-        Optional<FavoriteSource> favoriteSource = favoriteSourceCommandService
+        var favoriteSource = favoriteSourceCommandService
                 .handle(CreateFavoriteSourceCommandFromResourceAssembler.toCommandFromResource(resource));
-        if (favoriteSource.isEmpty())
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(ProblemDetail.forStatusAndDetail(
-                    HttpStatus.CONFLICT,
-                    messageSource.getMessage("favorite.source.error.duplicate", null,
-                            LocaleContextHolder.getLocale())));
-        return new ResponseEntity<>(FavoriteSourceResourceFromEntityAssembler.toResourceFromEntity(favoriteSource.get()), CREATED);
+        return ResponseEntityFromFavoriteSourceCommandResultAssembler.toResponseEntityFromResult(favoriteSource, messageSource);
     }
 
     /**
